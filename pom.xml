@@ -14,7 +14,7 @@
 	<name>Server</name>
 	<description>Chatit Server</description>
 	<properties>
-		<java.version>16</java.version>
+		<java.version>11</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
