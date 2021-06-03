@@ -3,7 +3,7 @@ package com.Chatit.Server.Tables;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 public class User {
 
     @Id
@@ -17,6 +17,10 @@ public class User {
         uname = Username;
         password = Password;
         email = Email;
+    }
+
+    public User() {
+
     }
 
     public long getid(){
