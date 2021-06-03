@@ -34,6 +34,7 @@ public class ServerApplication {
 		try{
 			userRepo.save(new User(Username,Password,Email));
 		}catch(Exception exp){
+			exp.printStackTrace();
 			return -1L;
 		}
 		List<User> chklist =  userRepo.findDistinctFirstByEmail(Email);
