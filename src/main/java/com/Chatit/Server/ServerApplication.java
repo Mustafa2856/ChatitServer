@@ -18,8 +18,8 @@ public class ServerApplication {
 	private UserRepo userRepo;
 
 	@RequestMapping(value = "/login",method = RequestMethod.POST)
-	Long Login(String Username,String Password){
-		List<User> chklist =  userRepo.findByUname(Username);
+	Long Login(String Email,String Password){
+		List<User> chklist =  userRepo.findDistinctFirstByEmail(Email);
 		for (User user : chklist) {
 			if(user.validatePassword(Password)){
 				return user.getid();
@@ -35,7 +35,7 @@ public class ServerApplication {
 		}catch(Exception exp){
 			return -1L;
 		}
-		List<User> chklist =  userRepo.findByUname(Username);
+		List<User> chklist =  userRepo.findDistinctFirstByEmail(Email);
 		for (User user : chklist) {
 			if(user.validatePassword(Password)){
 				return user.getid();

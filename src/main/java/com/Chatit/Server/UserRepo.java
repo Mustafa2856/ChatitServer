@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface UserRepo extends JpaRepository<User, Long> {
     List<User> findByUname(String Uname);
+    List<User> findDistinctFirstByEmail(String Email);
 }
