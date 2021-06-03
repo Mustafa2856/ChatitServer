@@ -13,7 +13,7 @@ public class ServerApplication {
 
 	@RequestMapping(value = "/login",method = RequestMethod.POST)
 	String Login(String Username,String Password){
-		return "False";
+		return "Username"+Username + "Password"+Password;
 	}
 
 	public static void main(String[] args) throws IOException {
