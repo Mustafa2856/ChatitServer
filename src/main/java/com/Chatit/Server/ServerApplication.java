@@ -2,9 +2,8 @@ package com.Chatit.Server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -12,10 +11,9 @@ import java.io.IOException;
 @SpringBootApplication
 public class ServerApplication {
 
-	@RequestMapping("/")
-	@ResponseBody
-	String home() {
-		return "Hello World!";
+	@RequestMapping(value = "/login",method = RequestMethod.POST)
+	String Login(String Username,String Password){
+		return "False";
 	}
 
 	public static void main(String[] args) throws IOException {
