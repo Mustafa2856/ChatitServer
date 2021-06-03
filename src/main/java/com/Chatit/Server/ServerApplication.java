@@ -21,9 +21,10 @@ public class ServerApplication {
 	Long Login(String Email,String Password){
 		List<User> chklist =  userRepo.findDistinctFirstByEmail(Email);
 		for (User user : chklist) {
-			if(user.validatePassword(Password)){
+			return user.getid();
+			/*if(user.validatePassword(Password)){
 				return user.getid();
-			}
+			}*/
 		}
 		return -1L;
 	}
