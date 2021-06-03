@@ -1,6 +1,7 @@
 package com.Chatit.Server;
 
 import com.Chatit.Server.Tables.User;
+import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,7 +30,11 @@ public class ServerApplication {
 
 	@RequestMapping(value="/register", method = RequestMethod.POST)
 	Long Register(String Username,String Password,String Email){
-		userRepo.save(new User(Username,Password,Email));
+		try{
+			userRepo.save(new User(Username,Password,Email));
+		}catch(Exception exp){
+			return -1L;
+		}
 		List<User> chklist =  userRepo.findByUname(Username);
 		for (User user : chklist) {
 			if(user.validatePassword(Password)){
