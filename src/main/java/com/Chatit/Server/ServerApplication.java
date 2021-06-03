@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 @SpringBootApplication
 public class ServerApplication {
@@ -16,7 +18,7 @@ public class ServerApplication {
 		return "Hello World!";
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		SpringApplication.run(ServerApplication.class, args);
 	}
 
