@@ -3,7 +3,7 @@ package com.Chatit.Server.Tables;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 public class User {
 
     @Id
