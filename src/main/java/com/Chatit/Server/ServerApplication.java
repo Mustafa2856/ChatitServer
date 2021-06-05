@@ -25,7 +25,7 @@ public class ServerApplication {
 	@Autowired
 	private UsrChatrepo usrchatrepo;
 
-	@RequestMapping(value="/")
+	@RequestMapping(value={"/","/error"})
 	String HomeErrorPage(){
 		return "This is a Spring REST API Backend for Chatit Application.No Web Pages are available here";
 	}
