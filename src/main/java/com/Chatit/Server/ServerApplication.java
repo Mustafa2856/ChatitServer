@@ -78,7 +78,7 @@ public class ServerApplication {
 		if(currentUser==null)return 0L;
 		List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
 		if(receiver.size()==0)return 1L;
-		if(message.equals(null))return 3L;
+		if(message==null)return 3L;
 		List<Message> msg = msgRepo.findDistinctByMessage(message);
 		if(msg.size()==0){
 			msgRepo.save(new Message(message));
