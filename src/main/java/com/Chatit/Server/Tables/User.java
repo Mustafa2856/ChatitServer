@@ -1,17 +1,26 @@
 package com.Chatit.Server.Tables;
 
+
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "\"user\"")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String uname;
     private String email;
     private String password;
+
+    @OneToMany(mappedBy = "sender")
+    private Set<UserChat> sent = new HashSet<>();
+
+    @OneToMany(mappedBy = "receiver")
+    private Set<UserChat> received = new HashSet<>();
 
     public User(String Username,String Password,String Email){
         uname = Username;
