@@ -16,17 +16,17 @@ import java.nio.charset.StandardCharsets;
 class ServerApplicationTests {
 
 
-	public void min(String ags[]) {
+	public static void main(String args[]) {
 		URL url = null;
 		try {
-			url = new URL("https://chatit-server.herokuapp.com/login");
+			url = new URL("https://chatit-server.herokuapp.com/register");
 			HttpURLConnection http = (HttpURLConnection)url.openConnection();
 			http.setRequestMethod("POST");
 			http.setDoOutput(true);
 			http.setDoInput(true);
 			http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-			String data = "Email=abcd%40example.com&Password=123456";
+			String data = "Username=janedoe&Email=abc@a.com&Password=123";
 
 			byte[] out = data.getBytes(StandardCharsets.UTF_8);
 
