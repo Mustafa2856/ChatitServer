@@ -62,9 +62,13 @@ public class ServerApplication {
 	}
 
 	@RequestMapping(value="/chats")
-	List<UserChat> getPendingChats(HttpServletRequest request){
+	List<UserChat> getPendingChats(HttpServletRequest request,String Email,String Password){
 		User currentUser = (User)request.getSession().getAttribute("user");
-		if(currentUser == null)return null;
+		if(currentUser == null) {
+			Login(request,Email,Password);
+			currentUser = (User)request.getSession().getAttribute("user");
+			if(currentUser==null)return null;
+		}
 		List<UserChat> chats = usrchatrepo.findUserChatByReceiverOrderByTimestampDesc(currentUser);
 		if(chats.size()>0)usrchatrepo.deleteUserChatByReceiver(currentUser);
 		//if(chats.size()>0)usrchatrepo.deleteByReceiverAndTimeStamp(currentUser,chats.get(0).getTimeStamp());
