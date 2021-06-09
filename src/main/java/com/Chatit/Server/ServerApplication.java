@@ -107,6 +107,11 @@ public class ServerApplication {
 		return 2L;
 	}
 
+	@RequestMapping(value="/finduser")
+	List<User> findUser(HttpServletRequest request,String uname){
+		return userRepo.findByUname(uname);
+	}
+
 	public static void main(String[] args){
 		SpringApplication.run(ServerApplication.class, args);
 	}

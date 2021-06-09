@@ -39,6 +39,10 @@ public class User {
 
     public String getEmail() { return email;}
 
+    public String getUname() {
+        return uname;
+    }
+
     public void setUname(String uname) {
         this.uname = uname;
     }
