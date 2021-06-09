@@ -39,6 +39,10 @@ public class User {
 
     public String getEmail() { return email;}
 
+    public void setUname(String uname) {
+        this.uname = uname;
+    }
+
     public boolean validatePassword(String Password){
         return (Password.equals(this.password));
     }

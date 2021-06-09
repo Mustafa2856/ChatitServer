@@ -61,6 +61,21 @@ public class ServerApplication {
 		return -1L;
 	}
 
+	@Transactional
+	@RequestMapping(value="/changename", method = RequestMethod.POST)
+	Long Changename(HttpServletRequest request,String Username,String Password,String Email){
+		List<User> chklist =  userRepo.findDistinctFirstByEmail(Email);
+		for (User user : chklist) {
+			if(user.validatePassword(Password)){
+				user.setUname(Username);
+				userRepo.save(user);
+				request.getSession().setAttribute("user",user);
+				return user.getid();
+			}
+		}
+		return -1L;
+	}
+
 	@RequestMapping(value="/chats")
 	List<UserChat> getPendingChats(HttpServletRequest request,String Email,String Password){
 		User currentUser = (User)request.getSession().getAttribute("user");
