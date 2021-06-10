@@ -92,9 +92,13 @@ public class ServerApplication {
 
 	@Transactional
 	@RequestMapping(value="/message")
-	Long message(HttpServletRequest request,String message,String ReceiverEmail){
+	Long message(HttpServletRequest request,String message,String ReceiverEmail,String Email,String Password){
 		User currentUser = (User)request.getSession().getAttribute("user");
-		if(currentUser==null)return 0L;
+		if(currentUser==null)if(currentUser == null) {
+			Login(request,Email,Password);
+			currentUser = (User)request.getSession().getAttribute("user");
+			if(currentUser==null)return null;
+		}
 		List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
 		if(receiver.size()==0)return 1L;
 		if(message==null)return 3L;
