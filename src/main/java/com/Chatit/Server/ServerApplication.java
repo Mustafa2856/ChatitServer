@@ -113,7 +113,7 @@ public class ServerApplication {
 
 	@RequestMapping(value="/finduser")
 	List<User> findUser(HttpServletRequest request,String uname){
-		return userRepo.findByUname(uname);
+		return userRepo.findByUnameContains(uname);
 	}
 
 	public static void main(String[] args){
