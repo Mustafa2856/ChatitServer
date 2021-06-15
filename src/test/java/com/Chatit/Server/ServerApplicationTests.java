@@ -1,50 +1,42 @@
 package com.Chatit.Server;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletRequest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-class ServerApplicationTests {
+public class ServerApplicationTests {
 
+    @Autowired
+    private ServerApplication MainApp;
+    @Autowired
+    private UserRepo userRepo;
+    @Autowired
+    private MessageRepo msgRepo;
+    @Autowired
+    private UsrChatrepo usrchatrepo;
 
-	public static void main(String args[]) {
-		URL url = null;
-		try {
-			url = new URL("https://chatit-server.herokuapp.com/register");
-			HttpURLConnection http = (HttpURLConnection)url.openConnection();
-			http.setRequestMethod("POST");
-			http.setDoOutput(true);
-			http.setDoInput(true);
-			http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+    @Test
+    public void contextLoads(){
+        assertThat(MainApp).isNotNull();
+        assertThat(userRepo).isNotNull();
+        assertThat(msgRepo).isNotNull();
+        assertThat(usrchatrepo).isNotNull();
+    }
 
-			String data = "Username=janedoe&Email=abc@a.com&Password=123";
-
-			byte[] out = data.getBytes(StandardCharsets.UTF_8);
-
-			OutputStream stream = http.getOutputStream();
-			stream.write(out);
-
-			System.out.println(http.getResponseCode() + " " + http.getResponseMessage());
-			InputStream res = http.getInputStream();
-			String ress = new String(res.readAllBytes());
-			System.out.println(ress);
-			http.disconnect();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (ProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
+    @Test
+    public void Datapass(){
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        Assertions.assertNotEquals(-1,MainApp.Login(request,"abc@a.com","123"));
+        Assertions.assertEquals(-1,MainApp.Register(request,"newusr","123","abc@a.com"));
+        assertThat(MainApp.getPendingChats(request,"abc@a.com","123")).isNotNull();
+    }
 }
