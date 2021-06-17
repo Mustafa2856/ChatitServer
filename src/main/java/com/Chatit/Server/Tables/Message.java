@@ -13,8 +13,8 @@ public class Message {
     private long id;
     private String message;
 
-    @OneToMany(mappedBy = "message")
-    private Set<Message> tmsg = new HashSet<>();
+    @OneToOne(mappedBy = "message")
+    private UserChat tmsg;
 
     public Message(String Message){
         message = Message;

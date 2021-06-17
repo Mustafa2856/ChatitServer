@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 
 @Transactional
@@ -42,11 +43,21 @@ public class ServerApplication {
 		return -1L;
 	}
 
+	public static byte[] hexStringToByteArray(String s) {
+		int len = s.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+					+ Character.digit(s.charAt(i+1), 16));
+		}
+		return data;
+	}
+
 	@Transactional
 	@RequestMapping(value="/register", method = RequestMethod.POST)
-	Long Register(HttpServletRequest request,String Username,String Password,String Email){
+	Long Register(HttpServletRequest request,String Username,String Password,String Email,String PublicKey){
 		try{
-			userRepo.save(new User(Username,Password,Email));
+			userRepo.save(new User(Username,Password,Email,hexStringToByteArray(PublicKey)));
 		}catch(Exception exp){
 			exp.printStackTrace();
 			return -1L;
@@ -85,9 +96,33 @@ public class ServerApplication {
 			if(currentUser==null)return null;
 		}
 		List<UserChat> chats = usrchatrepo.findUserChatByReceiverOrderByTimestampDesc(currentUser);
-		if(chats.size()>0)usrchatrepo.deleteUserChatByReceiver(currentUser);
+		for(UserChat chat:chats){
+			usrchatrepo.delete(chat);
+			msgRepo.delete(chat.getMessage());
+		}
 		//if(chats.size()>0)usrchatrepo.deleteByReceiverAndTimeStamp(currentUser,chats.get(0).getTimeStamp());
 		return chats;
+	}
+
+	private String toHexString(byte[] hash)
+	{
+		// Convert byte array into signum representation
+		BigInteger number = new BigInteger(1, hash);
+
+		// Convert message digest into hex value
+		StringBuilder hexString = new StringBuilder(number.toString(16));
+
+		// Pad with leading zeros
+		while (hexString.length() < 32)
+		{
+			hexString.insert(0, '0');
+		}
+
+		return hexString.toString();
+	}
+
+	String getPublicKey(String email){
+		return toHexString(userRepo.findDistinctFirstByEmail(email).get(0).getPublickey());
 	}
 
 	@Transactional
@@ -102,12 +137,9 @@ public class ServerApplication {
 		List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
 		if(receiver.size()==0)return 1L;
 		if(message==null)return 3L;
-		List<Message> msg = msgRepo.findDistinctByMessage(message);
-		if(msg.size()==0){
-			msgRepo.save(new Message(message));
-			msg = msgRepo.findDistinctByMessage(message);
-		}
-		usrchatrepo.save(new UserChat(currentUser,receiver.get(0),msg.get(0)));
+		Message msg = new Message(message);
+		msgRepo.save(msg);
+		usrchatrepo.save(new UserChat(currentUser,receiver.get(0),msg));
 		return 2L;
 	}
 

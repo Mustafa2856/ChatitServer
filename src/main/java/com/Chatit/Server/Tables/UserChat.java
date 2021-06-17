@@ -20,7 +20,7 @@ public class UserChat {
     @ManyToOne
     @JoinColumn(name = "received")
     private User receiver;
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "tmsg")
     private Message message;
 

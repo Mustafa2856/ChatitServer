@@ -16,6 +16,7 @@ public class User {
     @Column(unique = true)
     private String email;
     private String password;
+    private byte[] publickey;
 
     @OneToMany(mappedBy = "sender")
     private Set<UserChat> sent = new HashSet<>();
@@ -23,10 +24,11 @@ public class User {
     @OneToMany(mappedBy = "receiver")
     private Set<UserChat> received = new HashSet<>();
 
-    public User(String Username,String Password,String Email){
+    public User(String Username,String Password,String Email,byte[] PublicKey){
         uname = Username;
         password = Password;
         email = Email;
+        publickey = PublicKey;
     }
 
     public User() {
@@ -41,6 +43,10 @@ public class User {
 
     public String getUname() {
         return uname;
+    }
+
+    public byte[] getPublickey() {
+        return publickey;
     }
 
     public void setUname(String uname) {
