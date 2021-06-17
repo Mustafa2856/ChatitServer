@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Transactional
@@ -88,7 +89,7 @@ public class ServerApplication {
 	}
 
 	@RequestMapping(value="/chats")
-	List<UserChat> getPendingChats(HttpServletRequest request,String Email,String Password){
+	List<UserChat> getPendingChats(HttpServletRequest request, String Email, String Password){
 		User currentUser = (User)request.getSession().getAttribute("user");
 		if(currentUser == null) {
 			Login(request,Email,Password);
@@ -121,6 +122,7 @@ public class ServerApplication {
 		return hexString.toString();
 	}
 
+	@RequestMapping(value="/getpkey")
 	String getPublicKey(String email){
 		return toHexString(userRepo.findDistinctFirstByEmail(email).get(0).getPublickey());
 	}
