@@ -124,7 +124,11 @@ public class ServerApplication {
 
 	@RequestMapping(value="/getpkey")
 	String getPublicKey(String email){
-		return toHexString(userRepo.findDistinctFirstByEmail(email).get(0).getPublickey());
+		try {
+			return toHexString(userRepo.findDistinctFirstByEmail(email).get(0).getPublickey());
+		}catch (Exception e){
+			return null;
+		}
 	}
 
 	@Transactional
