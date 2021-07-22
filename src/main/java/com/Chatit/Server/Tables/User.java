@@ -5,6 +5,13 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * User Table:
+ *  Int     id
+ *  String  uname
+ *  String  email
+ *  String  password
+ */
 @Entity
 @Table(name = "\"user\"")
 public class User {

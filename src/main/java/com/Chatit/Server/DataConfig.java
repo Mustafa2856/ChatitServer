@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import javax.sql.DataSource;
 
+/**
+ * Class to configure and set source database
+ */
 @Configuration
 public class DataConfig {
 

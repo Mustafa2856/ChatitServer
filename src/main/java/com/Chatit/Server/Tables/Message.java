@@ -1,9 +1,12 @@
 package com.Chatit.Server.Tables;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
+/**
+ * Message Table:
+ *  Int     id
+ *  String  message
+ */
 @Entity
 @Table(name = "message")
 public class Message {
@@ -17,7 +20,7 @@ public class Message {
     @OneToOne(mappedBy = "message")
     private UserChat tmsg;
 
-    public Message(String Message){
+    public Message(String Message) {
         message = Message;
     }
 
@@ -25,7 +28,7 @@ public class Message {
 
     }
 
-    public long getid(){
+    public long getid() {
         return id;
     }
 

@@ -5,8 +5,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.sql.Timestamp;
 
+/**
+ * UserChat Table:
+ *  Int         id
+ *  Timestamp   timestamp
+ *  User        sender
+ *  User        receiver
+ *  Message     message
+ */
 @Entity
-@Table(name="userchat")
+@Table(name = "userchat")
 public class UserChat {
 
     @Id
@@ -24,7 +32,7 @@ public class UserChat {
     @JoinColumn(name = "tmsg")
     private Message message;
 
-    public UserChat(User sender, User receiver, Message msg){
+    public UserChat(User sender, User receiver, Message msg) {
         this.sender = sender;
         this.receiver = receiver;
         this.message = msg;
@@ -38,7 +46,9 @@ public class UserChat {
         return id;
     }
 
-    public Timestamp getTimeStamp(){return timestamp;}
+    public Timestamp getTimeStamp() {
+        return timestamp;
+    }
 
     public User getReceiver() {
         return receiver;
