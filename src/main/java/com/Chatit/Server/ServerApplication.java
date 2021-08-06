@@ -3,7 +3,6 @@ package com.Chatit.Server;
 import com.Chatit.Server.Tables.Message;
 import com.Chatit.Server.Tables.User;
 import com.Chatit.Server.Tables.UserChat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -48,69 +48,61 @@ public class ServerApplication {
     }
 
     @RequestMapping(value = {"/", "/error"})
-    String HomeErrorPage() {
+    String homeErrorPage() {
         return "This is a Spring REST API Backend for Chatit Application.No Web Pages are available here";
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    Long Login(HttpServletRequest request, String Email, String Password) {
+    User Login(String Email, String Password) {
         List<User> chklist = userRepo.findDistinctFirstByEmail(Email);
         for (User user : chklist) {
             if (user.validatePassword(Password)) {
-                request.getSession().setAttribute("user", user);
-                return user.getid();
+                return user;
             }
         }
-        return -1L;
+        return null;
     }
 
     @Transactional
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    Long Register(HttpServletRequest request, String Username, String Password, String Email, String PublicKey) {
+    User Register(String Username, String Password, String Email, String PublicKey) {
         try {
             userRepo.save(new User(Username, Password, Email, hexStringToByteArray(PublicKey)));
         } catch (Exception exp) {
             exp.printStackTrace();
-            return -1L;
+            return null;
         }
-        List<User> chklist = userRepo.findDistinctFirstByEmail(Email);
-        for (User user : chklist) {
-            if (user.validatePassword(Password)) {
-                request.getSession().setAttribute("user", user);
-                return user.getid();
-            }
+        return Login(Email, Password);
+    }
+
+    @Transactional
+    @RequestMapping(value = "/setpkey", method = RequestMethod.POST)
+    Long SetPkey(String Email, String Password, String PublicKey){
+        User user = Login(Email, Password);
+        if(user != null){
+            user.setPublickey(hexStringToByteArray(PublicKey));
+            userRepo.save(user);
+            return 0L;
         }
         return -1L;
     }
 
     @Transactional
     @RequestMapping(value = "/changename", method = RequestMethod.POST)
-    Long Changename(HttpServletRequest request, String Username, String Password, String Email) {
-        List<User> chklist = userRepo.findDistinctFirstByEmail(Email);
-        for (User user : chklist) {
-            if (user.validatePassword(Password)) {
-                user.setUname(Username);
-                userRepo.save(user);
-                request.getSession().setAttribute("user", user);
-                return user.getid();
-            }
+    Long changeName(String Username, String Password, String Email) {
+        User user = Login(Email, Password);
+        if(user != null){
+            user.setUname(Username);
+            userRepo.save(user);
+            return 0L;
         }
         return -1L;
     }
 
-    @RequestMapping(value = "/chats")
-    List<UserChat> getPendingChats(HttpServletRequest request, String Email, String Password) {
-        User currentUser = (User) request.getSession().getAttribute("user");
-        if (currentUser == null) {
-            Login(request, Email, Password);
-            currentUser = (User) request.getSession().getAttribute("user");
-            if (currentUser == null) return null;
-        }
-        List<UserChat> chats = usrchatrepo.findUserChatByReceiverOrderByTimestampDesc(currentUser);
-        for (UserChat chat : chats) {
-            usrchatrepo.delete(chat);
-            msgRepo.delete(chat.getMessage());
-        }
+    @RequestMapping(value = "/chats", method = RequestMethod.POST)
+    List<UserChat> getPendingChats(String Email, String Password, String Timestamp) {
+        User currentUser = Login(Email, Password);
+        List<UserChat> chats = usrchatrepo.findUserChatByReceiverAndTimestampAfter(currentUser, java.sql.Timestamp.valueOf(Timestamp));
         return chats;
     }
 
@@ -133,14 +125,9 @@ public class ServerApplication {
     }
 
     @Transactional
-    @RequestMapping(value = "/message")
-    Long message(HttpServletRequest request, String message, String ReceiverEmail, String Email, String Password) {
-        User currentUser = (User) request.getSession().getAttribute("user");
-        if (currentUser == null) {
-            Login(request, Email, Password);
-            currentUser = (User) request.getSession().getAttribute("user");
-            if (currentUser == null) return null;
-        }
+    @RequestMapping(value = "/message", method = RequestMethod.POST)
+    Long message(String message, String ReceiverEmail, String Email, String Password) {
+        User currentUser = Login(Email, Password);
         List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
         if (receiver.size() == 0) return 1L;
         if (message == null) return 3L;
@@ -151,8 +138,13 @@ public class ServerApplication {
     }
 
     @RequestMapping(value = "/finduser")
-    List<User> findUser(String uname) {
-        return userRepo.findByUnameContains(uname);
+    List<User> findUser(String email) {
+        List<User> res = userRepo.findByEmailContains(email);
+        int limit = 10;
+        if(res.size() > limit){
+            res = res.subList(0,limit);
+        }
+        return res;
     }
 
 }

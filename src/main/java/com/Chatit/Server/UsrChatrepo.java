@@ -5,12 +5,10 @@ import com.Chatit.Server.Tables.UserChat;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Transactional
 public interface UsrChatrepo extends JpaRepository<UserChat, Long> {
-    List<UserChat> findUserChatByReceiverOrderByTimestampDesc(User Reciver);
-
-    @Transactional
-    void deleteUserChatByReceiver(User Reciever);
+    List<UserChat> findUserChatByReceiverAndTimestampAfter(User Receiver, Timestamp timestamp);
 }

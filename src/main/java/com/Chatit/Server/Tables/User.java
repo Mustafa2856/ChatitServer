@@ -43,10 +43,6 @@ public class User {
 
     }
 
-    public long getid(){
-        return id;
-    }
-
     public String getEmail() { return email;}
 
     public String getUname() {
@@ -56,6 +52,8 @@ public class User {
     public byte[] getPublickey() {
         return publickey;
     }
+
+    public void setPublickey(byte[] publickey){ this.publickey = publickey;}
 
     public void setUname(String uname) {
         this.uname = uname;

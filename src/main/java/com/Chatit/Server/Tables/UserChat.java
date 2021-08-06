@@ -42,10 +42,6 @@ public class UserChat {
 
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public Timestamp getTimeStamp() {
         return timestamp;
     }

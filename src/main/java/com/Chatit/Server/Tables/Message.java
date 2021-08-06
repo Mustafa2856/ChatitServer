@@ -28,10 +28,6 @@ public class Message {
 
     }
 
-    public long getid() {
-        return id;
-    }
-
     public String getMessage() {
         return message;
     }
