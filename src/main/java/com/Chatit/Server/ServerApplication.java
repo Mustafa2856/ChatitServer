@@ -108,22 +108,7 @@ public class ServerApplication {
         }
         return res;
     }
-/*
-    @Transactional
-    @RequestMapping(value = "/message", method = RequestMethod.POST)
-    Long message(String Message, String ReceiverEmail, String Email, String Password,String Type) {
-        User currentUser = Login(Email, Password);
-        List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
-        if (receiver.size() == 0) return 1L;
-        if (Message == null) return 3L;
-        com.Chatit.Server.Tables.Message.MSGTYPE type = com.Chatit.Server.Tables.Message.MSGTYPE.valueOf(Type);
-        if(type != com.Chatit.Server.Tables.Message.MSGTYPE.TEXT)return 3L;
-        Message msg = new Message(Base64.getDecoder().decode(Message),type);
-        msgRepo.save(msg);
-        usrchatrepo.save(new UserChat(currentUser, receiver.get(0), msg));
-        return 2L;
-    }
-*/
+
     @Transactional
     @RequestMapping(value = "/message",method = RequestMethod.POST)
     Long message(@RequestBody byte[] data){
@@ -174,7 +159,7 @@ public class ServerApplication {
     @RequestMapping(value = "/chats", method = RequestMethod.POST)
     List<UserChat> getPendingChats(String Email, String Password, String Timestamp) {
         User currentUser = Login(Email, Password);
-        List<UserChat> chats = usrchatrepo.findUserChatByReceiverAndTimestampAfter(currentUser, java.sql.Timestamp.valueOf(Timestamp));
+        List<UserChat> chats = usrchatrepo.findFirstByReceiverAndTimestampAfter(currentUser, java.sql.Timestamp.valueOf(Timestamp));
         return chats;
     }
 
