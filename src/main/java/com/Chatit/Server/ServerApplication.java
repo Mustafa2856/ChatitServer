@@ -5,14 +5,15 @@ import com.Chatit.Server.Tables.User;
 import com.Chatit.Server.Tables.UserChat;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
-import java.sql.Timestamp;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -33,22 +34,12 @@ public class ServerApplication {
         this.usrchatrepo = usrchatrepo;
     }
 
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-    }
-
     public static void main(String[] args) {
         SpringApplication.run(ServerApplication.class, args);
     }
 
-    @RequestMapping(value = {"/", "/error"})
-    String homeErrorPage() {
+    @RequestMapping(value = {"/"})
+    String homePage() {
         return "This is a Spring REST API Backend for Chatit Application.No Web Pages are available here";
     }
 
@@ -67,7 +58,7 @@ public class ServerApplication {
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     User Register(String Username, String Password, String Email, String PublicKey) {
         try {
-            userRepo.save(new User(Username, Password, Email, hexStringToByteArray(PublicKey)));
+            userRepo.save(new User(Username, Password, Email, Base64.getDecoder().decode(PublicKey)));
         } catch (Exception exp) {
             exp.printStackTrace();
             return null;
@@ -77,14 +68,23 @@ public class ServerApplication {
 
     @Transactional
     @RequestMapping(value = "/setpkey", method = RequestMethod.POST)
-    Long SetPkey(String Email, String Password, String PublicKey){
+    Long setPublicKey(String Email, String Password, String PublicKey){
         User user = Login(Email, Password);
         if(user != null){
-            user.setPublickey(hexStringToByteArray(PublicKey));
+            user.setPublickey(Base64.getDecoder().decode(PublicKey));
             userRepo.save(user);
             return 0L;
         }
         return -1L;
+    }
+
+    @RequestMapping(value = "/getpkey")
+    String getPublicKey(String Email) {
+        try {
+            return Base64.getEncoder().encodeToString(userRepo.findDistinctFirstByEmail(Email).get(0).getPublickey());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Transactional
@@ -99,52 +99,83 @@ public class ServerApplication {
         return -1L;
     }
 
-    @RequestMapping(value = "/chats", method = RequestMethod.POST)
-    List<UserChat> getPendingChats(String Email, String Password, String Timestamp) {
-        User currentUser = Login(Email, Password);
-        List<UserChat> chats = usrchatrepo.findUserChatByReceiverAndTimestampAfter(currentUser, java.sql.Timestamp.valueOf(Timestamp));
-        return chats;
-    }
-
-    private String toHexString(byte[] hash) {
-        BigInteger number = new BigInteger(1, hash);
-        StringBuilder hexString = new StringBuilder(number.toString(16));
-        while (hexString.length() < 32) {
-            hexString.insert(0, '0');
-        }
-        return hexString.toString();
-    }
-
-    @RequestMapping(value = "/getpkey")
-    String getPublicKey(String email) {
-        try {
-            return toHexString(userRepo.findDistinctFirstByEmail(email).get(0).getPublickey());
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    @Transactional
-    @RequestMapping(value = "/message", method = RequestMethod.POST)
-    Long message(String message, String ReceiverEmail, String Email, String Password) {
-        User currentUser = Login(Email, Password);
-        List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
-        if (receiver.size() == 0) return 1L;
-        if (message == null) return 3L;
-        Message msg = new Message(message);
-        msgRepo.save(msg);
-        usrchatrepo.save(new UserChat(currentUser, receiver.get(0), msg));
-        return 2L;
-    }
-
     @RequestMapping(value = "/finduser")
-    List<User> findUser(String email) {
-        List<User> res = userRepo.findByEmailContains(email);
+    List<User> findUser(String Email) {
+        List<User> res = userRepo.findByEmailContains(Email);
         int limit = 10;
         if(res.size() > limit){
             res = res.subList(0,limit);
         }
         return res;
+    }
+/*
+    @Transactional
+    @RequestMapping(value = "/message", method = RequestMethod.POST)
+    Long message(String Message, String ReceiverEmail, String Email, String Password,String Type) {
+        User currentUser = Login(Email, Password);
+        List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
+        if (receiver.size() == 0) return 1L;
+        if (Message == null) return 3L;
+        com.Chatit.Server.Tables.Message.MSGTYPE type = com.Chatit.Server.Tables.Message.MSGTYPE.valueOf(Type);
+        if(type != com.Chatit.Server.Tables.Message.MSGTYPE.TEXT)return 3L;
+        Message msg = new Message(Base64.getDecoder().decode(Message),type);
+        msgRepo.save(msg);
+        usrchatrepo.save(new UserChat(currentUser, receiver.get(0), msg));
+        return 2L;
+    }
+*/
+    @Transactional
+    @RequestMapping(value = "/message",method = RequestMethod.POST)
+    Long message(@RequestBody byte[] data){
+        String Email = null,Password = null,ReceiverEmail = null,Type = null;
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        int index = 0,i=0;
+        for(i=0;i<data.length;i++){
+            if(data[i]== '-') {
+                if(index == 0){
+                    Email = new String(Base64.getDecoder().decode(bout.toByteArray()));
+                    bout = new ByteArrayOutputStream();
+                }
+                else if(index == 1){
+                    Password = new String(Base64.getDecoder().decode(bout.toByteArray()));
+                    bout = new ByteArrayOutputStream();
+                }
+                else if(index == 2){
+                    ReceiverEmail = new String(Base64.getDecoder().decode(bout.toByteArray()));
+                    bout = new ByteArrayOutputStream();
+                }
+                else{
+                    Type = new String(Base64.getDecoder().decode(bout.toByteArray()));
+                    break;
+                }
+                index ++;
+            }
+            else bout.write(data[i]);
+        }
+        bout = new ByteArrayOutputStream();
+        User currentUser = Login(Email, Password);
+        List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
+        if (receiver.size() == 0 || currentUser == null) return 1L;
+        bout.write(data,i, data.length - i);
+        byte[] msgBytes = bout.toByteArray();
+        try{
+            Message.MSGTYPE type = Message.MSGTYPE.valueOf(Type);
+            Message msg = new Message(msgBytes,type);
+            msgRepo.save(msg);
+            usrchatrepo.save(new UserChat(currentUser,receiver.get(0),msg));
+            return 2L;
+        }
+        catch(IllegalArgumentException exp){
+            exp.printStackTrace();
+        }
+        return 0L;
+    }
+
+    @RequestMapping(value = "/chats", method = RequestMethod.POST)
+    List<UserChat> getPendingChats(String Email, String Password, String Timestamp) {
+        User currentUser = Login(Email, Password);
+        List<UserChat> chats = usrchatrepo.findUserChatByReceiverAndTimestampAfter(currentUser, java.sql.Timestamp.valueOf(Timestamp));
+        return chats;
     }
 
 }
