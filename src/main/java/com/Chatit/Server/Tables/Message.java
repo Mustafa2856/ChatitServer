@@ -16,7 +16,7 @@ public class Message {
 
     }
 
-    public enum MSGTYPE{TEXT,IMG,AUDIO,VIDEO}
+    public enum MSGTYPE{TEXT,IMG,AUDIO,VIDEO,DOC}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
