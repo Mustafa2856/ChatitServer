@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST API to provide server functions to the android chatting application Chatit
@@ -55,7 +56,11 @@ public class ServerApplication {
 
     @Transactional
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    User Register(String Username, String Password, String Email, String PublicKey) {
+    User Register(@RequestBody Map<String,Object> data) {
+        String Username = data.get("Username").toString();
+        String Password = data.get("Password").toString();
+        String Email = data.get("Email").toString();
+        String PublicKey = data.get("PublicKey").toString();
         try {
             userRepo.save(new User(Username, Password, Email, Base64.getDecoder().decode(PublicKey)));
         } catch (Exception exp) {
@@ -67,7 +72,10 @@ public class ServerApplication {
 
     @Transactional
     @RequestMapping(value = "/setpkey", method = RequestMethod.POST)
-    Long setPublicKey(String Email, String Password, String PublicKey){
+    Long setPublicKey(@RequestBody Map<String,Object> data){
+        String Password = data.get("Password").toString();
+        String Email = data.get("Email").toString();
+        String PublicKey = data.get("PublicKey").toString();
         User user = Login(Email, Password);
         if(user != null){
             user.setPublickey(Base64.getDecoder().decode(PublicKey));
@@ -88,7 +96,10 @@ public class ServerApplication {
 
     @Transactional
     @RequestMapping(value = "/changename", method = RequestMethod.POST)
-    Long changeName(String Username, String Password, String Email) {
+    Long changeName(@RequestBody Map<String,Object> data) {
+        String Username = data.get("Username").toString();
+        String Password = data.get("Password").toString();
+        String Email = data.get("Email").toString();
         User user = Login(Email, Password);
         if(user != null){
             user.setUname(Username);
@@ -156,7 +167,10 @@ public class ServerApplication {
     }
 
     @RequestMapping(value = "/chats", method = RequestMethod.POST)
-    @ResponseBody byte[] getPendingChats(String Email, String Password, String Timestamp) throws IOException {
+    @ResponseBody byte[] getPendingChats(@RequestBody Map<String,Object> data) throws IOException {
+        String Timestamp = data.get("Timestamp").toString();
+        String Password = data.get("Password").toString();
+        String Email = data.get("Email").toString();
         User currentUser = Login(Email, Password);
         UserChat chat = usrchatrepo.findFirstByReceiverAndTimestampAfterOrderByTimestampAsc(currentUser, java.sql.Timestamp.valueOf(Timestamp)).get(0);
         String Sender_uname = chat.getSender().getUname();
