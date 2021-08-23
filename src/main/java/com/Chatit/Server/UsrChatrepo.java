@@ -10,5 +10,5 @@ import java.util.List;
 
 @Transactional
 public interface UsrChatrepo extends JpaRepository<UserChat, Long> {
-    List<UserChat> findFirstByReceiverAndTimestampAfter(User Receiver, Timestamp timestamp);
+    List<UserChat> findFirstByReceiverAndTimestampAfterOrderByTimestampAsc(User Reciever,Timestamp timestamp);
 }

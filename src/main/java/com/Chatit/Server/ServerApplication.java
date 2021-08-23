@@ -5,14 +5,13 @@ import com.Chatit.Server.Tables.User;
 import com.Chatit.Server.Tables.UserChat;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
@@ -114,7 +113,7 @@ public class ServerApplication {
     Long message(@RequestBody byte[] data){
         String Email = null,Password = null,ReceiverEmail = null,Type = null;
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        int index = 0,i=0;
+        int index = 0,i;
         for(i=0;i<data.length;i++){
             if(data[i]== '-') {
                 if(index == 0){
@@ -141,7 +140,7 @@ public class ServerApplication {
         User currentUser = Login(Email, Password);
         List<User> receiver = userRepo.findDistinctFirstByEmail(ReceiverEmail);
         if (receiver.size() == 0 || currentUser == null) return 1L;
-        bout.write(data,i, data.length - i);
+        bout.write(data,i+1, data.length - i-1);
         byte[] msgBytes = bout.toByteArray();
         try{
             Message.MSGTYPE type = Message.MSGTYPE.valueOf(Type);
@@ -157,10 +156,24 @@ public class ServerApplication {
     }
 
     @RequestMapping(value = "/chats", method = RequestMethod.POST)
-    List<UserChat> getPendingChats(String Email, String Password, String Timestamp) {
+    @ResponseBody byte[] getPendingChats(String Email, String Password, String Timestamp) throws IOException {
         User currentUser = Login(Email, Password);
-        List<UserChat> chats = usrchatrepo.findFirstByReceiverAndTimestampAfter(currentUser, java.sql.Timestamp.valueOf(Timestamp));
-        return chats;
+        UserChat chat = usrchatrepo.findFirstByReceiverAndTimestampAfterOrderByTimestampAsc(currentUser, java.sql.Timestamp.valueOf(Timestamp)).get(0);
+        String Sender_uname = chat.getSender().getUname();
+        String Sender_email = chat.getSender().getEmail();
+        String ts = chat.getTimeStamp().toString();
+        String type = chat.getMessage().getType().toString();
+        byte[] msg = chat.getMessage().getMessage();
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        bout.write(Base64.getEncoder().encode(Sender_email.getBytes(StandardCharsets.UTF_8)));
+        bout.write('-');
+        bout.write(Base64.getEncoder().encode(Sender_uname.getBytes(StandardCharsets.UTF_8)));
+        bout.write('-');
+        bout.write(Base64.getEncoder().encode(ts.getBytes(StandardCharsets.UTF_8)));
+        bout.write('-');
+        bout.write(Base64.getEncoder().encode(type.getBytes(StandardCharsets.UTF_8)));
+        bout.write('-');
+        bout.write(msg);
+        return bout.toByteArray();
     }
-
 }
