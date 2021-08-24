@@ -124,6 +124,8 @@ public class ServerApplication {
     Long message(@RequestBody byte[] data){
         String Email = null,Password = null,ReceiverEmail = null,Type = null;
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        String s = new String(data);
+        System.out.println(s);
         int index = 0,i;
         for(i=0;i<data.length;i++){
             if(data[i]== '-') {
