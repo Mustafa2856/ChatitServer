@@ -167,27 +167,33 @@ public class ServerApplication {
     }
 
     @RequestMapping(value = "/chats", method = RequestMethod.POST)
-    @ResponseBody byte[] getPendingChats(@RequestBody Map<String,Object> data) throws IOException {
+    @ResponseBody byte[] getPendingChats(@RequestBody Map<String,Object> data) {
         String Timestamp = data.get("Timestamp").toString();
         String Password = data.get("Password").toString();
         String Email = data.get("Email").toString();
         User currentUser = Login(Email, Password);
-        UserChat chat = usrchatrepo.findFirstByReceiverAndTimestampAfterOrderByTimestampAsc(currentUser, java.sql.Timestamp.valueOf(Timestamp)).get(0);
-        String Sender_uname = chat.getSender().getUname();
-        String Sender_email = chat.getSender().getEmail();
-        String ts = chat.getTimeStamp().toString();
-        String type = chat.getMessage().getType().toString();
-        byte[] msg = chat.getMessage().getMessage();
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        bout.write(Base64.getEncoder().encode(Sender_email.getBytes(StandardCharsets.UTF_8)));
-        bout.write('-');
-        bout.write(Base64.getEncoder().encode(Sender_uname.getBytes(StandardCharsets.UTF_8)));
-        bout.write('-');
-        bout.write(Base64.getEncoder().encode(ts.getBytes(StandardCharsets.UTF_8)));
-        bout.write('-');
-        bout.write(Base64.getEncoder().encode(type.getBytes(StandardCharsets.UTF_8)));
-        bout.write('-');
-        bout.write(msg);
-        return bout.toByteArray();
+        try{
+            UserChat chat = usrchatrepo.findFirstByReceiverAndTimestampAfterOrderByTimestampAsc(currentUser, java.sql.Timestamp.valueOf(Timestamp)).get(0);
+            String Sender_uname = chat.getSender().getUname();
+            String Sender_email = chat.getSender().getEmail();
+            String ts = chat.getTimeStamp().toString();
+            String type = chat.getMessage().getType().toString();
+            byte[] msg = chat.getMessage().getMessage();
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            bout.write(Base64.getEncoder().encode(Sender_email.getBytes(StandardCharsets.UTF_8)));
+            bout.write('-');
+            bout.write(Base64.getEncoder().encode(Sender_uname.getBytes(StandardCharsets.UTF_8)));
+            bout.write('-');
+            bout.write(Base64.getEncoder().encode(ts.getBytes(StandardCharsets.UTF_8)));
+            bout.write('-');
+            bout.write(Base64.getEncoder().encode(type.getBytes(StandardCharsets.UTF_8)));
+            bout.write('-');
+            bout.write(msg);
+            return bout.toByteArray();
+        }
+        catch(Exception e){
+            return null;
+        }
+
     }
 }
