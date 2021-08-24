@@ -192,6 +192,7 @@ public class ServerApplication {
             return bout.toByteArray();
         }
         catch(Exception e){
+            e.printStackTrace();
             return null;
         }
 
